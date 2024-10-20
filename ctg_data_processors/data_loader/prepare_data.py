@@ -7,15 +7,24 @@
 #   Student ID: 202304297
 #   Email: x2023dvl@stfx.ca
 
-
 import pandas as pd
 
-def prepare_nsp_data(path_to_xls_file):
+def read_data(input_path, sheet_name):
     """
-    This function reads the data from the excel file and prepares it for NSP analysis.
-    Basically, it removes the columns that are not useful for NSP analysis and exports the modified dataset as required by df-analyze package to a csv file.
+    This function reads the data for analysis.
+    Basically, it removes the columns that are not useful for different kind of analysis and exports the modified dataset as required by df-analyze package to a csv file.
 
-    This function uses pandas library to read and modify the dataset.
+    This function uses xlrd library which is installed as the dependecy for pandas library to extract the content from xls file.
+    @software{
+        xlrd,
+        author       = {Chris Withers and the xlrd development team},
+        title        = {xlrd},
+        version      = {latest},
+        url          = {https://xlrd.readthedocs.io/en/latest/#xlrd}
+        copyright    = Copyright 2005-2019 Stephen John Machin, Lingfo Pty Ltd. 2019-2021 Chris Withers Revision 0c4e80b3.
+    }
+
+    This function uses pandas library to read the dataset.
     @software{
         reback2020pandas,
         author       = {The pandas development team},
@@ -28,30 +37,47 @@ def prepare_nsp_data(path_to_xls_file):
         url          = {https://doi.org/10.5281/zenodo.3509134}
     }
 
-    This function uses xlrd library to read the excel file which is installed as a dependency of pandas library.
+    Args:
+    input_path: Input path for the xls file.
+    sheet_name: Name of the sheet in the xls file.
+
+    Returns:
+    data: The data read from the xls file in pandas dataframe format
+    """
+    
+    data = pd.read_excel(input_path, sheet_name=sheet_name)
+    return data
+
+
+def prepare_data(raw_data, output_path, columns_to_drop):
+    """
+    This function prepares the data for analysis.
+    Basically, it removes the columns that are not useful for different kind of analysis and exports the modified dataset as required by df-analyze package to a csv file.
+
+    This function uses pandas library to modify the dataset.
     @software{
-        xlrd,
-        author       = {Chris Withers and the xlrd development team},
-        title        = {xlrd},
+        reback2020pandas,
+        author       = {The pandas development team},
+        title        = {pandas-dev/pandas: Pandas},
+        month        = feb,
+        year         = 2020,
+        publisher    = {Zenodo},
         version      = {latest},
-        url          = {https://xlrd.readthedocs.io/en/latest/#xlrd}
-        copyright    = Copyright 2005-2019 Stephen John Machin, Lingfo Pty Ltd. 2019-2021 Chris Withers Revision 0c4e80b3.
+        doi          = {10.5281/zenodo.3509134},
+        url          = {https://doi.org/10.5281/zenodo.3509134}
     }
 
     Args:
-    path_to_xls_file: Path to the excel file containing the raw data downloaded from (Campos, D. & Bernardes, J. (2000). Cardiotocography [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C51S4N.)
+    raw_data: The raw data downloaded from (Campos, D. & Bernardes, J. (2000). Cardiotocography [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C51S4N.)
+    output_path: The path where the csv file will be stored.
+    columns_to_drop: Unwanted columns that will be removed from dataframe
 
     Returns:
     data: The modified dataset in pandas dataframe format
     """
-
-
-    # Load the data from the excel file
-    data = pd.read_excel(path_to_xls_file, sheet_name='Raw Data')
     
-    # Remove columns that are not useful for NSP analysis
-    columns_to_drop = ['FileName', 'Date', 'SegFile', 'b', 'e', 'SUSP', 'LBE', 'DR', 'A', 'B', 'C', 'D', 'E', 'AD', 'DE', 'LD', 'FS', 'SUSP', 'CLASS']
-    data = data.drop(columns=columns_to_drop)
+    # Remove columns that are not useful for analysis
+    data = raw_data.drop(columns=columns_to_drop)
 
     # Remove the first row from raw data as it doesn't have any values
     data = data.drop(index=0)
@@ -60,7 +86,6 @@ def prepare_nsp_data(path_to_xls_file):
     print(data.head())
 
     # Export the modified dataset to a csv file
-    # TODO: Improvise the below line to use dynamic path instead of a static path
-    data.to_csv('data/output/processed_data_ctg_nsp.csv', index=False)
+    data.to_csv(output_path, index=False)
     
     return data
